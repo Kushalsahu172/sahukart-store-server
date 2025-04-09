@@ -6,12 +6,21 @@ require('dotenv').config();
 
 // Middleware
 app.use(express.json()); // Parse JSON bodies (replaces bodyParser.json())
-app.use(cors({
-    origin: process.env.CLIENT_BASE_URL,
-    credentials: true
-  }));
-app.options('*', cors()); // Handle preflight requests
+const allowedOrigins = [
+  'https://sahukart.netlify.app',        // customer-facing frontend
+  'https://sahukart-admin.netlify.app'   // admin panel
+];
 
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 // Serve static files (uploads folder for images)
 app.use('/uploads', express.static('uploads'));
 
